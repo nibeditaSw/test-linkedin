@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>🗓 Scheduled Posts</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    :root {
+      --bg-color: #f3f6f9;
+      --text-color: #1a1a1a;
+      --card-bg: rgba(255, 255, 255, 0.5);
+      --border-color: rgba(180, 180, 180, 0.3);
+      --btn-bg: linear-gradient(135deg, #00c6ff, #0072ff);
+      --btn-hover-bg: linear-gradient(135deg, #00b0e6, #0059cc);
+      --table-alt: rgba(255, 255, 255, 0.15);
+    }
+
+    [data-theme="dark"] {
+      --bg-color: #10131a;
+      --text-color: #ffffff;
+      --card-bg: rgba(40, 40, 40, 0.4);
+      --border-color: rgba(255, 255, 255, 0.1);
+      --btn-bg: linear-gradient(135deg, #667eea, #764ba2);
+      --btn-hover-bg: linear-gradient(135deg, #556de8, #653a91);
+      --table-alt: rgba(255, 255, 255, 0.05);
+    }
+
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+      background: var(--bg-color);
+      background-image: url('https://www.transparenttextures.com/patterns/whitediamond.png');
+      color: var(--text-color);
+      transition: background 0.3s, color 0.3s;
+    }
+
+    h2 {
+      text-align: center;
+      margin-top: 0;
+      font-size: 24px;
+    }
+
+    .theme-toggle {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 8px;
+      background: var(--btn-bg);
+      color: white;
+      cursor: pointer;
+      font-size: 13px;
+    }
+
+    .theme-toggle:hover {
+      background: var(--btn-hover-bg);
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-bottom: 20px;
+      text-decoration: none;
+      color: #0077cc;
+      font-size: 14px;
+    }
+
+    .table-container {
+      background: var(--card-bg);
+      backdrop-filter: blur(12px);
+      padding: 20px;
+      border-radius: 16px;
+      overflow-x: auto;
+      max-width: 1000px;
+      margin: 0 auto;
+      border: 1px solid var(--border-color);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border: 1px solid var(--border-color);
+    }
+
+    th {
+      background-color: var(--table-alt);
+    }
+
+    tr:nth-child(even) {
+      background-color: var(--table-alt);
+    }
+
+    .status-posted {
+      color: #2ecc71;
+      font-weight: bold;
+    }
+
+    .status-pending {
+      color: #f39c12;
+      font-weight: bold;
+    }
+
+    @media (max-width: 600px) {
+      table, th, td {
+        font-size: 12px;
+      }
+    }
+  </style>
+</head>
+<body data-theme="light">
+
+  <button class="theme-toggle" onclick="toggleTheme()">🌗 Toggle Theme</button>
+
+  <a href="javascript:history.back()" class="back-link">⬅ Back</a>
+
+  <h2>🗓 Scheduled LinkedIn Posts</h2>
+
+  <div class="table-container">
+    {% if posts %}
+      <table>
+        <tr>
+          <th>Scheduled DateTime (UTC)</th>
+          <th>Text</th>
+          <th>Image</th>
+          <th>Status</th>
+        </tr>
+        {% for post in posts %}
+          <tr>
+            <td>{{ post.scheduled_datetime }}</td>
+            <td>{{ post.text[:80] }}{% if post.text|length > 80 %}...{% endif %}</td>
+            <td>{{ post.image_url or "—" }}</td>
+            <td class="{{ 'status-posted' if post.posted else 'status-pending' }}">
+              {% if post.posted %}✅ Posted{% else %}⏳ Pending{% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+      </table>
+    {% else %}
+      <p style="text-align:center;">No scheduled posts found.</p>
+    {% endif %}
+  </div>
+
+  <script>
+    function toggleTheme() {
+      const body = document.body;
+      const current = body.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      body.setAttribute('data-theme', next);
+      localStorage.setItem('theme', next);
+    }
+
+    (function () {
+      const saved = localStorage.getItem('theme');
+      if (saved) document.body.setAttribute('data-theme', saved);
+    })();
+  </script>
+
+</body>
+</html>

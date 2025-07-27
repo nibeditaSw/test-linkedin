@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Post Result</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    :root {
+      --bg-color: #f2f4f7;
+      --text-color: #1a1a1a;
+      --card-bg: rgba(255, 255, 255, 0.6);
+      --border-color: rgba(200, 200, 200, 0.5);
+      --btn-bg: linear-gradient(135deg, #42e695, #3bb2b8, #5864f2);
+      --btn-hover-bg: linear-gradient(135deg, #3bdc89, #36a2a7, #4655d2);
+    }
+
+    [data-theme="dark"] {
+      --bg-color: #121212;
+      --text-color: #ffffff;
+      --card-bg: rgba(30, 30, 30, 0.6);
+      --border-color: rgba(255, 255, 255, 0.1);
+      --btn-bg: linear-gradient(135deg, #5ee7df, #b490ca);
+      --btn-hover-bg: linear-gradient(135deg, #4fd4cd, #a379c7);
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: var(--bg-color);
+      color: var(--text-color);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0;
+      background-image: url('https://www.transparenttextures.com/patterns/whitediamond.png');
+      background-size: cover;
+    }
+
+   header {
+      width: 100%;
+      padding: 15px 30px;
+      backdrop-filter: blur(12px);
+      background: rgba(255, 255, 255, 0.05);
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 999;
+    }
+
+    header h1 {
+      font-size: 20px;
+      margin: 0;
+    }
+
+    h2 {
+      text-align: center;
+      margin: 30px 0 10px;
+    }
+
+    .card {
+      background-color: var(--card-bg);
+      backdrop-filter: blur(12px);
+      border-radius: 16px;
+      border: 1px solid var(--border-color);
+      padding: 25px;
+      margin: 20px;
+      max-width: 800px;
+      width: 90%;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    }
+
+    textarea {
+      width: 100%;
+      padding: 10px;
+      font-size: 14px;
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      resize: vertical;
+      background: rgba(255, 255, 255, 0.4);
+      color: var(--text-color);
+    }
+
+    label {
+      font-weight: bold;
+      margin-top: 10px;
+      display: inline-block;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 15px;
+      align-items: center;
+    }
+
+    .actions button {
+      background: var(--btn-bg);
+      color: white;
+      border: none;
+      padding: 10px 18px;
+      border-radius: 10px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    .actions button:hover {
+      background: var(--btn-hover-bg);
+    }
+
+    input[type="datetime-local"] {
+      padding: 8px;
+      font-size: 14px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      background: rgba(255, 255, 255, 0.7);
+      color: var(--text-color);
+    }
+
+    .back-link {
+      text-decoration: none;
+      display: inline-block;
+      background: var(--btn-bg);
+      color: white;
+      padding: 10px 20px;
+      border-radius: 10px;
+      margin-top: 25px;
+      transition: background 0.3s ease;
+    }
+
+    .back-link:hover {
+      background: var(--btn-hover-bg);
+    }
+
+    .theme-toggle {
+      background: var(--btn-bg);
+      color: white;
+      border: none;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    .theme-toggle:hover {
+      background: var(--btn-hover-bg);
+    }
+
+    @media (max-width: 600px) {
+      .actions {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .actions button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+
+<body data-theme="light">
+
+  <header>
+    <h1>Post Actions</h1>
+    <button class="theme-toggle" onclick="toggleTheme()">🌗 Toggle Theme</button>
+  </header>
+
+  <div class="card">
+    <p><strong>{{ message }}</strong></p>
+    <form action="/handle_post_action" method="post">
+      <label>Input:</label><br/>
+      <textarea name="input" rows="2" readonly>{{ input }}</textarea><br/><br/>
+
+      <label>Edited Output:</label><br/>
+      <textarea name="output" rows="5">{{ output }}</textarea><br/>
+
+      <input type="hidden" name="variation" value="{{ variation or '' }}">
+      <input type="hidden" name="image" value="{{ image }}">
+
+      <div class="actions">
+        <button name="action" value="edit">✏️ Edit</button>
+        <button name="action" value="post">🚀 Post to LinkedIn</button>
+        <input type="datetime-local" name="schedule_time">
+        <button name="action" value="schedule">🕒 Schedule</button>
+      </div>
+    </form>
+  </div>
+
+  <a class="back-link" href="javascript:history.back()">⬅️ Back</a>
+
+
+  <script>
+    function toggleTheme() {
+      const body = document.body;
+      const current = body.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      body.setAttribute('data-theme', next);
+      localStorage.setItem('theme', next);
+    }
+
+    (function () {
+      const saved = localStorage.getItem('theme');
+      if (saved) document.body.setAttribute('data-theme', saved);
+    })();
+  </script>
+
+</body>
+</html>

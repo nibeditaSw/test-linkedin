@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>LinkedIn Scheduler</title>
+</head>
+<body>
+  <h2>Post or Schedule LinkedIn Content</h2>
+
+  <!-- Post Now Form -->
+  <form action="/post_now" method="post">
+    <label><strong>Text:</strong></label><br/>
+    <textarea name="text" rows="5" cols="50" required></textarea><br/><br/>
+
+    <label><strong>Image URL (optional):</strong></label><br/>
+    <input type="text" name="image_url" placeholder="https://example.com/image.jpg" /><br/><br/>
+
+    <button type="submit">🚀 Post to LinkedIn Now</button>
+  </form>
+
+  <hr/>
+
+  <!-- Schedule Post Form -->
+  <form action="/schedule" method="post">
+    <label><strong>Text:</strong></label><br/>
+    <textarea name="text" rows="5" cols="50" required></textarea><br/><br/>
+
+    <label><strong>Image URL (optional):</strong></label><br/>
+    <input type="text" name="image_url" placeholder="https://example.com/image.jpg" /><br/><br/>
+
+    <label><strong>Schedule DateTime (UTC):</strong></label><br/>
+    <input type="datetime-local" name="scheduled_datetime" required /><br/><br/>
+
+    <button type="submit">📅 Schedule for Later</button>
+  </form>
+
+  <hr/>
+  {% if message %}
+    <p style="color:green;"><strong>{{ message }}</strong></p>
+  {% endif %}
+  {% if error %}
+    <p style="color:red;"><strong>{{ error }}</strong></p>
+  {% endif %}
+</body>
+</html>

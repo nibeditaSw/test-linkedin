@@ -1,0 +1,242 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Processed Results</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    :root {
+      --bg-color: #f0f2f5;
+      --text-color: #1a1a1a;
+      --card-bg: rgba(255, 255, 255, 0.6);
+      --border-color: rgba(200, 200, 200, 0.5);
+      --btn-bg: linear-gradient(135deg, #42e695, #3bb2b8, #5864f2);
+      --btn-hover-bg: linear-gradient(135deg, #3bdc89, #36a2a7, #4655d2);
+    }
+
+    [data-theme="dark"] {
+      --bg-color: #121212;
+      --text-color: #ffffff;
+      --card-bg: rgba(30, 30, 30, 0.6);
+      --border-color: rgba(255, 255, 255, 0.1);
+      --btn-bg: linear-gradient(135deg, #5ee7df, #b490ca);
+      --btn-hover-bg: linear-gradient(135deg, #4fd4cd, #a379c7);
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: var(--bg-color);
+      color: var(--text-color);
+      min-height: 100vh;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background-image: url('https://www.transparenttextures.com/patterns/whitediamond.png');
+      background-size: cover;
+    }
+
+    header {
+      width: 100%;
+      padding: 15px 30px;
+      backdrop-filter: blur(12px);
+      background: rgba(255, 255, 255, 0.05);
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 999;
+    }
+
+    header h1 {
+      font-size: 20px;
+      margin: 0;
+    }
+
+    .back-link {
+      text-decoration: none;
+      color: white;
+      background: var(--btn-bg);
+      padding: 8px 16px;
+      border-radius: 10px;
+      margin: 10px auto 30px;
+      display: inline-block;
+      transition: 0.3s ease;
+    }
+
+    .back-link:hover {
+      background: var(--btn-hover-bg);
+    }
+
+    .result-card {
+      background-color: var(--card-bg);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 20px;
+      margin: 15px;
+      max-width: 800px;
+      width: 90%;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    }
+
+    .result-card textarea {
+      width: 100%;
+      height: 100px;
+      font-size: 14px;
+      padding: 10px;
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      background-color: rgba(255, 255, 255, 0.4);
+      color: var(--text-color);
+      resize: vertical;
+    }
+
+    .result-card form {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .result-card strong {
+      font-weight: 600;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: flex-start;
+      align-items: center;
+    }
+
+    .actions button {
+      background: var(--btn-bg);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 16px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    .actions button:hover {
+      background: var(--btn-hover-bg);
+    }
+.actions button:disabled {
+  background: gray;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+    input[type="datetime-local"] {
+      padding: 6px;
+      font-size: 13px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      color: var(--text-color);
+      background: rgba(255, 255, 255, 0.7);
+    }
+
+    .theme-toggle {
+      background: var(--btn-bg);
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .theme-toggle:hover {
+      background: var(--btn-hover-bg);
+    }
+
+    @media (max-width: 600px) {
+      .actions {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .actions button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+
+<body data-theme="light">
+
+  <header>
+    <h1>Processed Results — {{ "Enhance" if action == "enhance" else "Generate" }}</h1>
+    <button class="theme-toggle" onclick="toggleTheme()">🌗 Toggle Theme</button>
+  </header>
+
+  <a class="back-link" href="/">⬅️ Upload Another</a>
+
+  {% for item in results %}
+    <div class="result-card">
+      <p><strong>Type:</strong> {{ item.type }}</p>
+      <p><strong>Input:</strong> {{ item.input }}</p>
+      {% if item.variation %}
+        <p><strong>Variation {{ item.variation }}</strong></p>
+      {% endif %}
+
+      <form action="/handle_post_action" method="post">
+        <textarea name="output">{{ item.output }}</textarea>
+        <input type="hidden" name="image" value="{{ item.image }}">
+        <input type="hidden" name="input" value="{{ item.input }}">
+        <input type="hidden" name="variation" value="{{ item.variation or '' }}">
+
+        <div class="actions">
+          <button class="edit-btn" name="action" value="edit" disabled>✏️ Edit</button>
+          <button name="action" value="post">🚀 Post to LinkedIn</button>
+          <input type="datetime-local" name="schedule_time">
+          <button name="action" value="schedule">🕒 Schedule</button>
+        </div>
+      </form>
+    </div>
+  {% endfor %}
+
+  <script>
+    function toggleTheme() {
+      const body = document.body;
+      const current = body.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      body.setAttribute('data-theme', next);
+      localStorage.setItem('theme', next);
+    }
+
+    // Load saved theme on load
+    (function () {
+      const savedTheme = localStorage.getItem('theme');
+      if (savedTheme) {
+        document.body.setAttribute('data-theme', savedTheme);
+      }
+    })();
+
+    // Enable Edit button only if textarea is changed
+    document.addEventListener("DOMContentLoaded", () => {
+      document.querySelectorAll(".result-card").forEach((card) => {
+        const textarea = card.querySelector("textarea");
+        const editButton = card.querySelector(".edit-btn");
+        const originalValue = textarea.value;
+
+        textarea.addEventListener("input", () => {
+          if (textarea.value !== originalValue) {
+            editButton.disabled = false;
+          } else {
+            editButton.disabled = true;
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>

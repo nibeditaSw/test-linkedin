@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>LinkedIn Automation – Upload Excel</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    :root {
+      --bg-color: #eef2f5;
+      --text-color: #1a1a1a;
+      --card-bg: rgba(255, 255, 255, 0.3);
+      --border-color: rgba(200, 200, 200, 0.5);
+      --btn-bg: linear-gradient(135deg, #43e97b, #38f9d7);
+      --btn-hover-bg: linear-gradient(135deg, #34d87b, #32e6cb);
+      --table-alt: rgba(255, 255, 255, 0.15);
+    }
+
+    [data-theme="dark"] {
+      --bg-color: #10131a;
+      --text-color: #ffffff;
+      --card-bg: rgba(40, 40, 40, 0.4);
+      --border-color: rgba(255, 255, 255, 0.1);
+      --btn-bg: linear-gradient(135deg, #667eea, #764ba2);
+      --btn-hover-bg: linear-gradient(135deg, #556de8, #653a91);
+      --table-alt: rgba(255, 255, 255, 0.05);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: var(--bg-color);
+      color: var(--text-color);
+      background-image: url('https://www.transparenttextures.com/patterns/whitediamond.png');
+      background-size: cover;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      transition: background 0.3s ease, color 0.3s ease;
+    }
+
+    header {
+      width: 100%;
+      padding: 15px 30px;
+      backdrop-filter: blur(12px);
+      background: rgba(255, 255, 255, 0.05);
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 999;
+    }
+
+    header h1 {
+      font-size: 20px;
+      margin: 0;
+    }
+
+    .theme-toggle {
+      background: var(--btn-bg);
+      color: white;
+      padding: 6px 12px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+
+    .theme-toggle:hover {
+      background: var(--btn-hover-bg);
+    }
+
+    main {
+      max-width: 800px;
+      width: 100%;
+      margin: 40px auto;
+      padding: 20px;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      font-size: 20px;
+    }
+
+    .dropzone {
+      border: 2px dashed var(--border-color);
+      background: var(--card-bg);
+      padding: 30px;
+      border-radius: 16px;
+      text-align: center;
+      transition: background 0.3s ease;
+      cursor: pointer;
+    }
+
+    .dropzone:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .dropzone.dragover {
+      border-color: #00c9a7;
+      background: rgba(0, 201, 167, 0.1);
+    }
+
+    .dropzone input[type="file"] {
+      display: none;
+    }
+
+    .upload-actions {
+      margin-top: 20px;
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    button {
+      background: var(--btn-bg);
+      color: white;
+      border: none;
+      padding: 10px 18px;
+      border-radius: 10px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: var(--btn-hover-bg);
+    }
+
+    .success, .error {
+      text-align: center;
+      margin-top: 15px;
+      font-size: 13px;
+    }
+
+    .success {
+      color: #2ecc71;
+    }
+
+    .error {
+      color: #e74c3c;
+    }
+
+    .link-button {
+      display: inline-block;
+      background: var(--btn-bg);
+      color: white;
+      padding: 10px 20px;
+      border-radius: 10px;
+      font-size: 14px;
+      text-decoration: none;
+      transition: background 0.3s ease;
+      text-align: center;
+      margin-top: 10px;
+    }
+
+    .link-button:hover {
+      background: var(--btn-hover-bg);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      background-color: var(--card-bg);
+      backdrop-filter: blur(6px);
+      font-size: 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    th, td {
+      padding: 6px 10px;
+      border: 1px solid var(--border-color);
+      color: var(--text-color);
+    }
+
+    th {
+      background-color: var(--table-alt);
+    }
+
+    tr:nth-child(even) {
+      background-color: var(--table-alt);
+    }
+
+    #fileNameDisplay {
+      margin-top: 12px;
+      font-size: 13px;
+      color: var(--text-color);
+    }
+
+    @media (max-width: 600px) {
+      .upload-actions {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body data-theme="light">
+
+  <header>
+    <h1>LinkedIn Automation</h1>
+    <button class="theme-toggle" onclick="toggleTheme()">🌗 Toggle Theme</button>
+  </header>
+
+  <main>
+    <h2>📁 Upload Excel File</h2>
+
+    <form id="uploadForm" class="dropzone" action="/upload" method="post" enctype="multipart/form-data">
+      <label for="fileInput">
+        Drag & Drop or <strong>Click to Browse</strong>
+        <input type="file" id="fileInput" name="file" accept=".xlsx" required>
+      </label>
+      <p id="fileNameDisplay"></p>
+      <button type="submit">📤 Upload</button>
+      <a href="/scheduled" class="link-button">📋 View Scheduled Posts</a>
+    </form>
+
+    {% if filename %}
+      <p class="success">✅ File uploaded: {{ filename }}</p>
+
+      {% if preview %}
+        <h3 style="margin-top: 30px;">📄 Preview</h3>
+        <div class="table-wrapper">
+          {{ preview | safe }}
+        </div>
+      {% endif %}
+
+      <form action="/process" method="post">
+        <input type="hidden" name="filename" value="{{ filename }}">
+        <div class="upload-actions">
+          <button type="submit" name="action" value="enhance">✨ Enhance</button>
+          <button type="submit" name="action" value="generate">🧠 Generate</button>
+        </div>
+      </form>
+    {% endif %}
+
+    {% if error %}
+      <p class="error">{{ error }}</p>
+    {% endif %}
+  </main>
+
+  <script>
+    const dropzone = document.querySelector('.dropzone');
+    const fileInput = document.getElementById('fileInput');
+    const fileNameDisplay = document.getElementById('fileNameDisplay');
+
+    // Drag and drop
+    dropzone.addEventListener('dragover', e => {
+      e.preventDefault();
+      dropzone.classList.add('dragover');
+    });
+
+    dropzone.addEventListener('dragleave', () => {
+      dropzone.classList.remove('dragover');
+    });
+
+    dropzone.addEventListener('drop', e => {
+      e.preventDefault();
+      dropzone.classList.remove('dragover');
+      if (e.dataTransfer.files.length) {
+        fileInput.files = e.dataTransfer.files;
+        fileNameDisplay.textContent = "📄 Selected file: " + fileInput.files[0].name;
+      }
+    });
+
+    // Show selected file name
+    fileInput.addEventListener('change', function () {
+      const fileName = this.files.length > 0 ? this.files[0].name : '';
+      fileNameDisplay.textContent = fileName ? `📄 Selected file: ${fileName}` : '';
+    });
+
+    // Dark/light toggle
+    function toggleTheme() {
+      const body = document.body;
+      const current = body.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      body.setAttribute('data-theme', next);
+      localStorage.setItem('theme', next);
+    }
+
+    (function () {
+      const savedTheme = localStorage.getItem('theme');
+      if (savedTheme) {
+        document.body.setAttribute('data-theme', savedTheme);
+      }
+    })();
+  </script>
+
+</body>
+</html>
