@@ -50,8 +50,10 @@
 
 # app/scheduler.py
 import logging
-from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
+from app.database import SessionLocal, ScheduledPost
+from app.linkedin import get_linkedin_user_id, post_to_linkedin
 from datetime import datetime
 from dotenv import load_dotenv
 import os
@@ -61,19 +63,51 @@ logger = logging.getLogger(__name__)
 
 load_dotenv()
 
+LINKEDIN_ACCESS_TOKEN = os.getenv("LINKEDIN_ACCESS_TOKEN")
+
+def scheduled_job(post_id, text, image_url):
+    logger.debug(f"Scheduler triggered for post {post_id}")
+    access_token = LINKEDIN_ACCESS_TOKEN
+    if not access_token:
+        logger.error("LINKEDIN_ACCESS_TOKEN is not set")
+        return
+    user_id = get_linkedin_user_id(access_token)
+    if not user_id:
+        logger.error("Cannot get LinkedIn user ID")
+        return
+    success = post_to_linkedin(text, access_token, user_id, image_url)
+    db = SessionLocal()
+    post = db.query(ScheduledPost).filter_by(post_id=post_id).first()
+    if post and success:
+        post.posted = True
+        db.commit()
+        logger.info(f"Post {post_id} marked as posted")
+    else:
+        logger.error(f"Failed to post {post_id} to LinkedIn")
+    db.close()
+
+scheduler = None
+
+def initialize_scheduler():
+    global scheduler
+    if scheduler is None:
+        jobstore = {
+            'default': SQLAlchemyJobStore(url=os.getenv("SCHEDULER_DB_URL"))
+        }
+        scheduler = BackgroundScheduler(jobstores=jobstore)
+        scheduler.start()
+        logger.info("Scheduler initialized and started")
+    return scheduler
+
 def add_job(post_id, text, image_url, run_datetime):
-    jobstore = {
-        'default': SQLAlchemyJobStore(url=os.getenv("SCHEDULER_DB_URL"))
-    }
-    scheduler = BackgroundScheduler(jobstores=jobstore)
+    global scheduler
+    scheduler = initialize_scheduler()
     scheduler.add_job(
-        func='app.scheduler_worker:scheduled_job',  # Reference the job in scheduler_worker
-        trigger="date",
+        scheduled_job,
+        "date",
         run_date=run_datetime,
         args=[post_id, text, image_url],
         id=post_id,
         replace_existing=True
     )
-    scheduler.start()
     logger.info(f"Job scheduled: {post_id} at {run_datetime}")
-    scheduler.shutdown()  # Shutdown immediately after adding job
