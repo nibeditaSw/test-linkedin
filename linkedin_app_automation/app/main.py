@@ -362,3 +362,13 @@ async def scheduled_dashboard(request: Request):
       "request": request,
       "posts": posts
   })
+
+# Add this endpoint to main.py
+@app.get("/scheduler_status")
+async def scheduler_status():
+    from app.scheduler import scheduler
+    jobs = scheduler.get_jobs() if scheduler else []
+    return {
+        "scheduler_running": scheduler is not None and scheduler.running,
+        "active_jobs": [str(job) for job in jobs]
+    }
