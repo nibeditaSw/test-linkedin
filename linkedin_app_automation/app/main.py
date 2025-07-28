@@ -125,7 +125,7 @@ async def handle_post_action(
     schedule_time: str = Form("")
 ):
     message = ""
-    access_token = os.getenv["LINKEDIN_ACCESS_TOKEN"]
+    access_token = os.getenv("LINKEDIN_ACCESS_TOKEN")
     user_id = get_linkedin_user_id(access_token)
 
     if action == "post":
