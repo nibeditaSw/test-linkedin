@@ -7,3 +7,4 @@ apscheduler
 pandas
 groq
 dotenv
+python-multipart
