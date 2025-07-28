@@ -9,3 +9,5 @@ groq
 dotenv
 python-multipart
 openpyxl
+gunicorn
+psycopg2-binary
