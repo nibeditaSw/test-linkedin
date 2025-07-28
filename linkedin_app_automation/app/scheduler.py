@@ -64,6 +64,7 @@ logger = logging.getLogger(__name__)
 load_dotenv()
 
 LINKEDIN_ACCESS_TOKEN = os.getenv("LINKEDIN_ACCESS_TOKEN")
+scheduler = None
 
 def scheduled_job(post_id, text, image_url):
     logger.debug(f"Scheduler triggered for post {post_id}")
@@ -86,11 +87,9 @@ def scheduled_job(post_id, text, image_url):
         logger.error(f"Failed to post {post_id} to LinkedIn")
     db.close()
 
-scheduler = None
-
 def initialize_scheduler():
     global scheduler
-    if scheduler is None:
+    if scheduler is None or not scheduler.running:
         jobstore = {
             'default': SQLAlchemyJobStore(url=os.getenv("SCHEDULER_DB_URL"))
         }
@@ -101,7 +100,7 @@ def initialize_scheduler():
 
 def add_job(post_id, text, image_url, run_datetime):
     global scheduler
-    scheduler = initialize_scheduler()
+    initialize_scheduler()
     scheduler.add_job(
         scheduled_job,
         "date",
