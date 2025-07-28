@@ -1,10 +1,12 @@
 from groq import Groq
 import json
+from dotenv import load_dotenv
+import os
 
 with open("app/config.json") as f:
     config = json.load(f)
-
-client = Groq(api_key=config["GROQ_API_KEY"])
+load_dotenv()
+client = Groq(api_key=os.getenv["GROQ_API_KEY"])
 
 def enhance_content(text: str) -> str:
     prompt = f"Paraphrase this for LinkedIn (under 100 words):\n{text}"
