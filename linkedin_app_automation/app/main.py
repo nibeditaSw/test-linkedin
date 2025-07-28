@@ -218,7 +218,6 @@ async def lifespan(app: FastAPI):
         logger.info("Scheduler shut down")
 
 app = FastAPI(lifespan=lifespan)
-app.mount("/static", StaticFiles(directory="app/static"), name="static")
 templates = Jinja2Templates(directory="app/templates")
 
 UPLOAD_DIR = "uploaded"
