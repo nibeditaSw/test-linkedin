@@ -18,7 +18,7 @@ with open("app/config.json") as f:
 
 def scheduled_job(post_id, text, image_url):
     logger.info(f"Scheduler triggered for post {post_id}")
-    access_token = os.getenv["LINKEDIN_ACCESS_TOKEN"]
+    access_token = os.getenv("LINKEDIN_ACCESS_TOKEN")
     user_id = get_linkedin_user_id(access_token)
     if not user_id:
         logger.error("Cannot get LinkedIn user ID")
