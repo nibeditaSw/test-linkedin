@@ -5,16 +5,20 @@ from app.database import SessionLocal, ScheduledPost
 from app.linkedin import get_linkedin_user_id, post_to_linkedin
 import json, logging
 from datetime import datetime
+from dotenv import load_dotenv
+import os
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+load_dotenv()
 
 with open("app/config.json") as f:
     config = json.load(f)
 
 def scheduled_job(post_id, text, image_url):
     logger.info(f"Scheduler triggered for post {post_id}")
-    access_token = config["LINKEDIN_ACCESS_TOKEN"]
+    access_token = os.getenv["LINKEDIN_ACCESS_TOKEN"]
     user_id = get_linkedin_user_id(access_token)
     if not user_id:
         logger.error("Cannot get LinkedIn user ID")
