@@ -194,13 +194,12 @@ from io import BytesIO
 import pandas as pd
 from app.groq import enhance_content, generate_content
 from app.linkedin import get_linkedin_user_id, post_to_linkedin
-from app.database import ScheduledPost, SessionLocal
+from app.database import SessionLocal, ScheduledPost
 from datetime import datetime
 from app.scheduler import initialize_scheduler, scheduler, add_job
 import logging
 from dotenv import load_dotenv
 import os
-
 
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -214,11 +213,12 @@ async def lifespan(app: FastAPI):
     initialize_scheduler()
     logger.info("Application started with scheduler")
     yield
-    if scheduler is not None:
+    if scheduler is not None and scheduler.running:
         scheduler.shutdown()
         logger.info("Scheduler shut down")
 
 app = FastAPI(lifespan=lifespan)
+app.mount("/static", StaticFiles(directory="app/static"), name="static")
 templates = Jinja2Templates(directory="app/templates")
 
 UPLOAD_DIR = "uploaded"
