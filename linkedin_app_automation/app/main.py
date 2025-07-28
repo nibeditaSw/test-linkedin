@@ -183,7 +183,6 @@
 #     })
 
 
-# app/main.py
 from fastapi import FastAPI, Request, UploadFile, Form
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
@@ -201,6 +200,7 @@ import logging
 from dotenv import load_dotenv
 import os
 
+
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
@@ -210,12 +210,12 @@ LINKEDIN_ACCESS_TOKEN = os.getenv("LINKEDIN_ACCESS_TOKEN")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    initialize_scheduler()
-    logger.info("Application started with scheduler")
-    yield
-    if scheduler is not None and scheduler.running:
-        scheduler.shutdown()
-        logger.info("Scheduler shut down")
+  initialize_scheduler()
+  logger.info("Application started with scheduler")
+  yield
+  if scheduler is not None and scheduler.running:
+      scheduler.shutdown()
+      logger.info("Scheduler shut down")
 
 app = FastAPI(lifespan=lifespan)
 templates = Jinja2Templates(directory="app/templates")
@@ -223,142 +223,142 @@ templates = Jinja2Templates(directory="app/templates")
 UPLOAD_DIR = "uploaded"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
+@app.get("/healthz")
+async def health_check():
+  return {"status": "ok"}
+
 @app.get("/", response_class=HTMLResponse)
 async def upload_page(request: Request):
-    return templates.TemplateResponse("upload_step.html", {
-        "request": request,
-        "filename": None
-    })
+  return templates.TemplateResponse("upload_step.html", {
+      "request": request,
+      "filename": None
+  })
 
 @app.post("/upload", response_class=HTMLResponse)
 async def upload_file(request: Request, file: UploadFile):
-    unique_name = f"{uuid.uuid4()}.xlsx"
-    path = os.path.join(UPLOAD_DIR, unique_name)
+  unique_name = f"{uuid.uuid4()}.xlsx"
+  path = os.path.join(UPLOAD_DIR, unique_name)
 
-    contents = await file.read()
-    with open(path, "wb") as f:
-        f.write(contents)
+  contents = await file.read()
+  with open(path, "wb") as f:
+      f.write(contents)
 
-    df = pd.read_excel(BytesIO(contents))
-    preview_html = df.head(10).to_html(index=False, classes="excel-preview")
+  df = pd.read_excel(BytesIO(contents))
+  preview_html = df.head(10).to_html(index=False, classes="excel-preview")
 
-    return templates.TemplateResponse("upload_step.html", {
-        "request": request,
-        "filename": unique_name,
-        "preview": preview_html
-    })
+  return templates.TemplateResponse("upload_step.html", {
+      "request": request,
+      "filename": unique_name,
+      "preview": preview_html
+  })
 
 @app.post("/process", response_class=HTMLResponse)
 async def process_file(
-    request: Request,
-    action: str = Form(...),
-    filename: str = Form(...)
+  request: Request,
+  action: str = Form(...),
+  filename: str = Form(...)
 ):
-    file_path = os.path.join(UPLOAD_DIR, filename)
+  file_path = os.path.join(UPLOAD_DIR, filename)
 
-    if not os.path.exists(file_path):
-        return templates.TemplateResponse("upload_step.html", {
-            "request": request,
-            "filename": None,
-            "error": "Uploaded file not found. Please upload again."
-        })
+  if not os.path.exists(file_path):
+      return templates.TemplateResponse("upload_step.html", {
+          "request": request,
+          "filename": None,
+          "error": "Uploaded file not found. Please upload again."
+      })
 
-    df = pd.read_excel(file_path)
-    results = []
+  df = pd.read_excel(file_path)
+  results = []
 
-    for _, row in df.iterrows():
-        text = str(row.get("Text", "")).strip()
-        typ = str(row.get("Type", "")).strip().lower()
-        image = row.get("image", "")
+  for _, row in df.iterrows():
+      text = str(row.get("Text", "")).strip()
+      typ = str(row.get("Type", "")).strip().lower()
+      image = row.get("image", "")
 
-        if not text or not typ:
-            continue
+      if not text or not typ:
+          continue
 
-        if action == "enhance" and typ == "content":
-            enhanced = enhance_content(text)
-            results.append({"type": typ, "input": text, "output": enhanced, "image": image})
+      if action == "enhance" and typ == "content":
+          enhanced = enhance_content(text)
+          results.append({"type": typ, "input": text, "output": enhanced, "image": image})
 
-        elif action == "generate" and typ == "prompt":
-            for variation, i in generate_content(text, 3):
-                results.append({"type": typ, "input": text, "output": variation, "variation": i, "image": image})
+      elif action == "generate" and typ == "prompt":
+          for variation, i in generate_content(text, 3):
+              results.append({"type": typ, "input": text, "output": variation, "variation": i, "image": image})
 
-    os.remove(file_path)
+  os.remove(file_path)
 
-    return templates.TemplateResponse("result_step.html", {
-        "request": request,
-        "results": results,
-        "action": action
-    })
+  return templates.TemplateResponse("result_step.html", {
+      "request": request,
+      "results": results,
+      "action": action
+  })
 
 @app.post("/handle_post_action", response_class=HTMLResponse)
 async def handle_post_action(
-    request: Request,
-    action: str = Form(...),
-    output: str = Form(...),
-    input: str = Form(...),
-    image: str = Form(""),
-    variation: str = Form(""),
-    schedule_time: str = Form("")
+  request: Request,
+  action: str = Form(...),
+  output: str = Form(...),
+  input: str = Form(...),
+  image: str = Form(""),
+  variation: str = Form(""),
+  schedule_time: str = Form("")
 ):
-    message = ""
-    access_token = LINKEDIN_ACCESS_TOKEN
-    user_id = get_linkedin_user_id(access_token)
+  message = ""
+  access_token = LINKEDIN_ACCESS_TOKEN
+  user_id = get_linkedin_user_id(access_token)
 
-    if action == "post":
-        success = post_to_linkedin(output, access_token, user_id, image)
-        message = "✅ Posted to LinkedIn!" if success else "❌ Failed to post."
+  if action == "post":
+      success = post_to_linkedin(output, access_token, user_id, image)
+      message = "✅ Posted to LinkedIn!" if success else "❌ Failed to post."
 
-    elif action == "schedule":
-        if schedule_time:
-            try:
-                run_dt = datetime.fromisoformat(schedule_time.replace('Z', '+00:00'))
-                post_id = str(uuid.uuid4())
-                logger.info(f"Scheduling post {post_id} for {run_dt}")
+  elif action == "schedule":
+      if schedule_time:
+          try:
+              run_dt = datetime.fromisoformat(schedule_time.replace('Z', '+00:00'))
+              post_id = str(uuid.uuid4())
+              logger.info(f"Scheduling post {post_id} for {run_dt}")
 
-                db = SessionLocal()
-                db.add(ScheduledPost(
-                    post_id=post_id,
-                    text=output,
-                    image_url=image,
-                    scheduled_datetime=schedule_time,
-                    posted=False
-                ))
-                db.commit()
-                db.close()
+              db = SessionLocal()
+              db.add(ScheduledPost(
+                  post_id=post_id,
+                  text=output,
+                  image_url=image,
+                  scheduled_datetime=schedule_time,
+                  posted=False
+              ))
+              db.commit()
+              db.close()
 
-                add_job(post_id, output, image, run_dt)
-                message = f"🕒 Scheduled for {schedule_time}"
-            except ValueError as e:
-                message = f"❌ Invalid schedule time format: {str(e)}"
-                logger.error(f"Invalid schedule time: {schedule_time}, error: {str(e)}")
-            except Exception as e:
-                message = f"❌ Error scheduling post: {str(e)}"
-                logger.error(f"Error scheduling post: {str(e)}")
-        else:
-            message = "⚠ Please select a schedule time."
+              add_job(post_id, output, image, run_dt)
+              message = f"🕒 Scheduled for {schedule_time}"
+          except ValueError as e:
+              message = f"❌ Invalid schedule time format: {str(e)}"
+              logger.error(f"Invalid schedule time: {schedule_time}, error: {str(e)}")
+          except Exception as e:
+              message = f"❌ Error scheduling post: {str(e)}"
+              logger.error(f"Error scheduling post: {str(e)}")
+      else:
+          message = "⚠ Please select a schedule time."
 
-    elif action == "edit":
-        message = "✏ Edited successfully! You can now post or schedule."
+  elif action == "edit":
+      message = "✏ Edited successfully! You can now post or schedule."
 
-    return templates.TemplateResponse("single_result.html", {
-        "request": request,
-        "output": output,
-        "input": input,
-        "variation": variation,
-        "image": image,
-        "message": message
-    })
+  return templates.TemplateResponse("single_result.html", {
+      "request": request,
+      "output": output,
+      "input": input,
+      "variation": variation,
+      "image": image,
+      "message": message
+  })
 
 @app.get("/scheduled", response_class=HTMLResponse)
 async def scheduled_dashboard(request: Request):
-    db = SessionLocal()
-    posts = db.query(ScheduledPost).order_by(ScheduledPost.scheduled_datetime.desc()).all()
-    db.close()
-    return templates.TemplateResponse("scheduled_dashboard.html", {
-        "request": request,
-        "posts": posts
-    })
-
-@app.get("/healthz")
-async def health_check():
-    return {"status": "ok"}
+  db = SessionLocal()
+  posts = db.query(ScheduledPost).order_by(ScheduledPost.scheduled_datetime.desc()).all()
+  db.close()
+  return templates.TemplateResponse("scheduled_dashboard.html", {
+      "request": request,
+      "posts": posts
+  })
