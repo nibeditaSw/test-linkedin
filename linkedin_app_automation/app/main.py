@@ -359,3 +359,7 @@ async def scheduled_dashboard(request: Request):
         "request": request,
         "posts": posts
     })
+
+@app.get("/healthz")
+async def health_check():
+    return {"status": "ok"}
