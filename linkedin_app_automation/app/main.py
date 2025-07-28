@@ -14,6 +14,8 @@ from datetime import datetime
 import json
 
 from app.scheduler import add_job
+from dotenv import load_dotenv
+import os
 
 with open("app/config.json") as f:
     config = json.load(f)
@@ -21,6 +23,8 @@ with open("app/config.json") as f:
 app = FastAPI()
 # app.mount("/static", StaticFiles(directory="app/static"), name="static")
 templates = Jinja2Templates(directory="app/templates")
+
+load_dotenv()
 
 UPLOAD_DIR = "uploaded"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
@@ -121,7 +125,7 @@ async def handle_post_action(
     schedule_time: str = Form("")
 ):
     message = ""
-    access_token = config["LINKEDIN_ACCESS_TOKEN"]
+    access_token = os.getenv["LINKEDIN_ACCESS_TOKEN"]
     user_id = get_linkedin_user_id(access_token)
 
     if action == "post":
