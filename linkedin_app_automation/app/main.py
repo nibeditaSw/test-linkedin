@@ -236,7 +236,7 @@ async def upload_page(request: Request):
 
 @app.get("/template")
 async def download_template():
-    template_path = "app\input_template.xlsx"
+    template_path = "app/input_template.xlsx"
     if not os.path.exists(template_path):
         logger.error("Template file not found")
         return {"error": "Template file not found"}
