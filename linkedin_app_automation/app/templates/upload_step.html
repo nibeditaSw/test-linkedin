@@ -210,19 +210,32 @@
 </head>
 <body data-theme="light">
 
-  <header>
+<!--   <header>
     <h1>LinkedIn Automation</h1>
     <button class="theme-toggle" onclick="toggleTheme()">🌗 Toggle Theme</button>
-  </header>
+  </header> -->
+  <header>
+  <img src="https://consoulsolution.com/wp-content/uploads/2025/05/Logp-PNG-1-1024x276.png" 
+       alt="Logo" style="height: 36px; object-fit: contain;"/>
+
+  <h1 style="flex: 1; text-align: center; margin-left: -36px;">LinkedIn Automation</h1>
+
+  <button class="theme-toggle" onclick="toggleTheme()">🌗 Toggle Theme</button>
+</header>
 
   <main>
     <h2>📁 Upload Excel File</h2>
 
     <form id="uploadForm" class="dropzone" action="/upload" method="post" enctype="multipart/form-data">
-      <label for="fileInput">
+<!--       <label for="fileInput">
         Drag & Drop or <strong>Click to Browse</strong>
         <input type="file" id="fileInput" name="file" accept=".xlsx" required>
-      </label>
+      </label> -->
+      <label for="fileInput" style="font-size: 15px; display: block; cursor: pointer;">
+  👉 <strong>Drag your Excel (.xlsx) file here</strong><br>
+  or <span style="color: #0077cc; text-decoration: underline;"><strong>Click here to browse</strong></span>
+  <input type="file" id="fileInput" name="file" accept=".xlsx" required>
+</label>
       <p id="fileNameDisplay"></p>
       <button type="submit">📤 Upload</button>
       <a href="/scheduled" class="link-button">📋 View Scheduled Posts</a>
