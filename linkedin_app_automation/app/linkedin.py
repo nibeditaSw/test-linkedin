@@ -1,9 +1,56 @@
 import requests
 import logging
 import json
+import re
+import base64
 
 logger = logging.getLogger(__name__)
 session = requests.Session()
+
+def resolve_onedrive_url(share_url):
+    """Resolve a OneDrive share link to a direct download URL."""
+    logger.debug(f"Attempting to resolve OneDrive share link: {share_url}")
+    try:
+        # Check if the URL is a OneDrive share link
+        if not ("1drv.ms" in share_url or "onedrive.live.com" in share_url):
+            logger.debug(f"Not a OneDrive share link: {share_url}")
+            return share_url  # Return original URL if not a OneDrive link
+
+        # Convert short 1drv.ms link to full onedrive.live.com link if needed
+        if "1drv.ms" in share_url:
+            response = session.get(share_url, allow_redirects=True, timeout=10)
+            response.raise_for_status()
+            share_url = response.url
+            logger.debug(f"Resolved 1drv.ms to: {share_url}")
+
+        # Extract the share ID from the URL
+        share_id_match = re.search(r"(?:/i/|id=)([a-zA-Z0-9_-]+)", share_url)
+        if not share_id_match:
+            logger.error(f"Could not extract share ID from OneDrive URL: {share_url}")
+            return None
+
+        share_id = share_id_match.group(1)
+        # Encode the share URL for OneDrive API
+        encoded_url = base64.urlsafe_b64encode(share_url.encode()).decode().rstrip("=")
+        api_url = f"https://api.onedrive.com/v1.0/shares/u!{encoded_url}/driveItem/content"
+
+        # Follow redirect to get the final download URL
+        response = session.get(api_url, allow_redirects=False, timeout=10)
+        if response.status_code in (301, 302, 303):
+            direct_url = response.headers.get("Location")
+            logger.info(f"Resolved OneDrive share link to direct URL: {direct_url}")
+            return direct_url
+        else:
+            logger.error(f"Unexpected response resolving OneDrive URL: Status {response.status_code}")
+            return None
+    except requests.exceptions.RequestException as e:
+        logger.error(f"Error resolving OneDrive share link {share_url}: {str(e)}")
+        return None
+    except Exception as e:
+        logger.error(f"Unexpected error resolving OneDrive share link {share_url}: {str(e)}")
+        return None
+
+
 
 def get_linkedin_user_id(access_token):
     """Fetch LinkedIn user ID using the /rest/me API."""

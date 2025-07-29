@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <title>LinkedIn Automation – Upload Excel</title>
@@ -133,7 +134,8 @@
       background: var(--btn-hover-bg);
     }
 
-    .success, .error {
+    .success,
+    .error {
       text-align: center;
       margin-top: 15px;
       font-size: 13px;
@@ -176,7 +178,8 @@
       overflow: hidden;
     }
 
-    th, td {
+    th,
+    td {
       padding: 6px 10px;
       border: 1px solid var(--border-color);
       color: var(--text-color);
@@ -206,65 +209,96 @@
         width: 100%;
       }
     }
-    #cancelButton { display: none; color: red; cursor: pointer; margin-left: 10px; }
-    .template-button { margin-top: 10px; }
+
+    #cancelButton {
+      display: none;
+      color: red;
+      cursor: pointer;
+      margin-left: 10px;
+    }
+
+    .template-button {
+      display: inline-block;
+      padding: 10px 20px;
+      background-color: #28a745;
+      color: white;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    .template-button:hover {
+      background-color: #218838;
+    }
+
+    .right-align {
+      text-align: right;
+      padding-top: 10px;
+      padding-right: 10px;
+    }
   </style>
 </head>
+
 <body data-theme="light">
 
-<!--   <header>
+  <!--   <header>
     <h1>LinkedIn Automation</h1>
     <button class="theme-toggle" onclick="toggleTheme()">🌗 Toggle Theme</button>
   </header> -->
   <header>
-  <img src="https://consoulsolution.com/wp-content/uploads/2025/05/Logp-PNG-1-1024x276.png" 
-       alt="Logo" style="height: 36px; object-fit: contain;"/>
+    <img src="https://consoulsolution.com/wp-content/uploads/2025/05/Logp-PNG-1-1024x276.png" alt="Logo"
+      style="height: 36px; object-fit: contain;" />
 
-  <h1 style="flex: 1; text-align: center; margin-left: -36px;">LinkedIn Automation</h1>
+    <h1 style="flex: 1; text-align: center; margin-left: -36px;">LinkedIn Automation</h1>
 
-  <button class="theme-toggle" onclick="toggleTheme()">🌗 Toggle Theme</button>
-</header>
-<a href="/template"><button type="button" class="template-button">📥 Download Input Template</button></a>
+    <button class="theme-toggle" onclick="toggleTheme()">🌗 Toggle Theme</button>
+  </header>
+  <div class="right-align">
+    <button type="button" class="template-button" onclick="downloadTemplate()">📥 Download Input Template</button>
+  </div>
   <main>
     <h2>📁 Upload Excel File</h2>
 
     <form id="uploadForm" class="dropzone" action="/upload" method="post" enctype="multipart/form-data">
-<!--       <label for="fileInput">
-        Drag & Drop or <strong>Click to Browse</strong>
-        <input type="file" id="fileInput" name="file" accept=".xlsx" required>
-      </label> -->
+
       <label for="fileInput" style="font-size: 15px; display: block; cursor: pointer;">
-  👉 <strong>Drag your Excel (.xlsx) file here</strong><br>
-  or <span style="color: #0077cc; text-decoration: underline;"><strong>Click here to browse</strong></span>
-  <input type="file" id="fileInput" name="file" accept=".xlsx" required>
-</label>
-      <p id="fileNameDisplay"></p>
-      <span id="cancelButton">❌ Cancel</span>
+        👉 <strong>Drag your Excel (.xlsx) file here</strong><br>
+        or <span style="color: #0077cc; text-decoration: underline;"><strong>Click here to browse</strong></span>
+
+        <input type="file" id="fileInput" name="file" accept=".xlsx" required>
+      </label>
+      <div class="file-info" style="margin-top: 10px; display: flex; align-items: center; justify-content: center;">
+        <p id="fileNameDisplay"></p> <span id="cancelButton">❌ Remove</span>
+      </div>
+
+
       <button type="submit">📤 Upload</button>
       <a href="/scheduled" class="link-button">📋 View Scheduled Posts</a>
     </form>
 
     {% if filename %}
-      <p class="success">✅ File uploaded: {{ filename }}</p>
+    <p class="success">✅ File uploaded: {{ filename }}</p>
 
-      {% if preview %}
-        <h3 style="margin-top: 30px;">📄 Preview</h3>
-        <div class="table-wrapper">
-          {{ preview | safe }}
-        </div>
-      {% endif %}
+    {% if preview %}
+    <h3 style="margin-top: 30px;">📄 Preview</h3>
+    <div class="table-wrapper">
+      {{ preview | safe }}
+    </div>
+    {% endif %}
 
-      <form action="/process" method="post">
-        <input type="hidden" name="filename" value="{{ filename }}">
-        <div class="upload-actions">
-          <button type="submit" name="action" value="enhance">✨ Enhance</button>
-          <button type="submit" name="action" value="generate">🧠 Generate</button>
-        </div>
-      </form>
+    <form action="/process" method="post">
+      <input type="hidden" name="filename" value="{{ filename }}">
+      <div class="upload-actions">
+        <button type="submit" name="action" value="enhance">✨ Enhance</button>
+        <button type="submit" name="action" value="generate">🧠 Generate</button>
+      </div>
+    </form>
     {% endif %}
 
     {% if error %}
-      <p class="error">{{ error }}</p>
+    <p class="error">{{ error }}</p>
     {% endif %}
   </main>
 
@@ -275,21 +309,21 @@
     const cancelButton = document.getElementById('cancelButton');
 
     fileInput.addEventListener('change', () => {
-            if (fileInput.files.length > 0) {
-                fileNameDisplay.textContent = `Selected: ${fileInput.files[0].name}`;
-                cancelButton.style.display = 'inline';
-            } else {
-                fileNameDisplay.textContent = '';
-                cancelButton.style.display = 'none';
-            }
-        });
+      if (fileInput.files.length > 0) {
+        fileNameDisplay.textContent = `Selected: ${fileInput.files[0].name}`;
+        cancelButton.style.display = 'inline';
+      } else {
+        fileNameDisplay.textContent = '';
+        cancelButton.style.display = 'none';
+      }
+    });
 
 
-        cancelButton.addEventListener('click', () => {
-            fileInput.value = ''; // Clear the file input
-            fileNameDisplay.textContent = '';
-            cancelButton.style.display = 'none';
-        });
+    cancelButton.addEventListener('click', () => {
+      fileInput.value = ''; // Clear the file input
+      fileNameDisplay.textContent = '';
+      cancelButton.style.display = 'none';
+    });
 
     // Drag and drop
     dropzone.addEventListener('dragover', e => {
@@ -331,7 +365,17 @@
         document.body.setAttribute('data-theme', savedTheme);
       }
     })();
+
+    function downloadTemplate() {
+      const link = document.createElement('a');
+      link.href = '/template';  // 🔁 Replace with actual route to your file if different
+      link.download = '';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
   </script>
 
 </body>
+
 </html>

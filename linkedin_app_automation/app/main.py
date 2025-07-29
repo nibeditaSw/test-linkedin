@@ -380,3 +380,26 @@ async def scheduler_status():
         "scheduler_running": scheduler is not None and scheduler.running,
         "active_jobs": [str(job) for job in jobs]
     }
+
+
+@app.post("/delete_post", response_class=RedirectResponse)
+async def delete_post(post_id: str = Form(...)):
+    try:
+        db = SessionLocal()
+        post = db.query(ScheduledPost).filter_by(post_id=post_id).first()
+        if post:
+            db.delete(post)
+            db.commit()
+            logger.info(f"Post {post_id} deleted from database")
+            if scheduler:
+                try:
+                    scheduler.remove_job(post_id)
+                    logger.info(f"Scheduler job {post_id} removed")
+                except Exception as e:
+                    logger.info(f"No scheduler job found for {post_id} or error removing job: {str(e)}")
+        else:
+            logger.error(f"Post {post_id} not found in database")
+        db.close()
+    except Exception as e:
+        logger.error(f"Error deleting post {post_id}: {str(e)}")
+    return RedirectResponse(url="/scheduled", status_code=303)
