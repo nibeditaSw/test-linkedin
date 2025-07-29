@@ -184,7 +184,7 @@
 
 
 from fastapi import FastAPI, Request, UploadFile, Form
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from contextlib import asynccontextmanager
@@ -233,6 +233,14 @@ async def upload_page(request: Request):
       "request": request,
       "filename": None
   })
+
+@app.get("/template")
+async def download_template():
+    template_path = "app\input_template.xlsx"
+    if not os.path.exists(template_path):
+        logger.error("Template file not found")
+        return {"error": "Template file not found"}
+    return FileResponse(template_path, filename="input_template.xlsx", media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 
 @app.post("/upload", response_class=HTMLResponse)
 async def upload_file(request: Request, file: UploadFile):

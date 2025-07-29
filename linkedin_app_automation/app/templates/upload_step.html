@@ -206,6 +206,8 @@
         width: 100%;
       }
     }
+    #cancelButton { display: none; color: red; cursor: pointer; margin-left: 10px; }
+    .template-button { margin-top: 10px; }
   </style>
 </head>
 <body data-theme="light">
@@ -222,7 +224,7 @@
 
   <button class="theme-toggle" onclick="toggleTheme()">🌗 Toggle Theme</button>
 </header>
-
+<a href="/template"><button type="button" class="template-button">📥 Download Input Template</button></a>
   <main>
     <h2>📁 Upload Excel File</h2>
 
@@ -237,6 +239,7 @@
   <input type="file" id="fileInput" name="file" accept=".xlsx" required>
 </label>
       <p id="fileNameDisplay"></p>
+      <span id="cancelButton">❌ Cancel</span>
       <button type="submit">📤 Upload</button>
       <a href="/scheduled" class="link-button">📋 View Scheduled Posts</a>
     </form>
@@ -269,6 +272,24 @@
     const dropzone = document.querySelector('.dropzone');
     const fileInput = document.getElementById('fileInput');
     const fileNameDisplay = document.getElementById('fileNameDisplay');
+    const cancelButton = document.getElementById('cancelButton');
+
+    fileInput.addEventListener('change', () => {
+            if (fileInput.files.length > 0) {
+                fileNameDisplay.textContent = `Selected: ${fileInput.files[0].name}`;
+                cancelButton.style.display = 'inline';
+            } else {
+                fileNameDisplay.textContent = '';
+                cancelButton.style.display = 'none';
+            }
+        });
+
+
+        cancelButton.addEventListener('click', () => {
+            fileInput.value = ''; // Clear the file input
+            fileNameDisplay.textContent = '';
+            cancelButton.style.display = 'none';
+        });
 
     // Drag and drop
     dropzone.addEventListener('dragover', e => {
